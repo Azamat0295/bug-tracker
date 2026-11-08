@@ -78,7 +78,23 @@ pipeline {
             steps {
                 sh 'docker compose up --build -d'
             }
-        }  
+        }
+        stage('API тесты') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.50.0-jammy'
+                    reuseNode true
+                    args '-u 0 --network=host' # u - от какого пользователя запускать, 0 это имени root 
+                }
+            }
+            steps {
+                dir('tests-api') {
+                    sh 'npx wait-port http://localhost:8081/api/health -t 30000'
+                    sh 'npm ci'
+                    sh 'npm playwright test'
+                }
+            }
+        }
     }
     post {
         always {
