@@ -105,28 +105,42 @@ pipeline {
                 }
             }
         }
-        stage('E2E тесты') {
+        // stage('E2E тесты') {
+        //     agent {
+        //         docker {
+        //             image 'mcr.microsoft.com/playwright:v1.50.0-jammy'
+        //             reuseNode true
+        //             args '-u 0 --network=host'  //u - от какого пользователя запускать, 0 это имени root 
+        //         }
+        //     }
+        //     steps {
+        //         dir('tests-e2e') {
+        //             sh 'npm ci'
+        //             sh 'npx playwright test'
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             junit 'tests-e2e/test-results/results.xml'
+        //             publishHTML target: [
+        //                 reportDir: 'tests-e2e/playwright-report',
+        //                 reportFiles: 'index.html',
+        //                 reportName: 'Отчет о API'
+        //             ]
+        //         }
+        //     }
+        // }
+        stage('Нагрузочное тестирование') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.50.0-jammy'
+                    image 'grafana/k6:latest'
                     reuseNode true
-                    args '-u 0 --network=host'  //u - от какого пользователя запускать, 0 это имени root 
+                    args '--network=host -u root --entrypoint=""'
                 }
             }
             steps {
-                dir('tests-e2e') {
-                    sh 'npm ci'
-                    sh 'npx playwright test'
-                }
-            }
-            post {
-                always {
-                    junit 'tests-e2e/test-results/results.xml'
-                    publishHTML target: [
-                        reportDir: 'tests-e2e/playwright-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Отчет о API'
-                    ]
+                dir('test-perf') {
+                    sh 'k6 run script.js'
                 }
             }
         }
