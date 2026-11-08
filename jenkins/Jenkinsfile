@@ -91,7 +91,7 @@ pipeline {
                 dir('tests-api') {
                     sh 'npx wait-port http://localhost:8081/api/health -t 30000'
                     sh 'npm ci'
-                    sh 'npm playwright test'
+                    sh 'npx playwright test'
                 }
             }
         }
